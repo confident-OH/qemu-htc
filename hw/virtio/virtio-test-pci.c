@@ -5,12 +5,13 @@
 #include "hw/virtio/virtio-test.h"
 #include "qapi/error.h"
 #include "qemu/module.h"
+#include "qemu/error-report.h"
 
 typedef struct VirtIOTestPCI VirtIOTestPCI;
 /*
  * virtio-test-pci: This extends VirtioPCIProxy.
  */
-#define TYPE_VIRTIO_TEST_PCI "virtio-test-pci"
+#define TYPE_VIRTIO_TEST_PCI "virtio-test-pci-base"
 #define VIRTIO_TEST_PCI(obj) \
         OBJECT_CHECK(VirtIOTestPCI, (obj), TYPE_VIRTIO_TEST_PCI)
 
@@ -61,9 +62,9 @@ static void virtio_test_pci_instance_init(Object *obj)
                                 TYPE_VIRTIO_TEST);
 }
 
-static const TypeInfo virtio_test_pci_info = {
-    .name          = TYPE_VIRTIO_TEST_PCI,
-    .parent        = TYPE_VIRTIO_PCI,
+static const VirtioPCIDeviceTypeInfo virtio_test_pci_info = {
+    .base_name             = TYPE_VIRTIO_TEST_PCI,
+    .generic_name          = "virtio-balloon-pci",
     .instance_size = sizeof(VirtIOTestPCI),
     .instance_init = virtio_test_pci_instance_init,
     .class_init    = virtio_test_pci_class_init,
@@ -71,7 +72,8 @@ static const TypeInfo virtio_test_pci_info = {
 
 static void virtio_test_pci_register(void)
 {
-    type_register_static(&virtio_test_pci_info);
+    error_printf("zyq start register virtio_pci\n");
+    virtio_pci_types_register(&virtio_test_pci_info);
 }
 
 type_init(virtio_test_pci_register)

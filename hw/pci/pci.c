@@ -2633,12 +2633,15 @@ static void pci_device_class_init(ObjectClass *klass, void *data)
 
 static void pci_device_class_base_init(ObjectClass *klass, void *data)
 {
+    static int i;
+    error_printf("%d: zyq\n", i++);
     if (!object_class_is_abstract(klass)) {
         ObjectClass *conventional =
             object_class_dynamic_cast(klass, INTERFACE_CONVENTIONAL_PCI_DEVICE);
         ObjectClass *pcie =
             object_class_dynamic_cast(klass, INTERFACE_PCIE_DEVICE);
-        assert(conventional || pcie);
+        assert(pcie);
+        assert(conventional);
     }
 }
 
