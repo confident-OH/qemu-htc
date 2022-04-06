@@ -12,6 +12,7 @@ common-obj-$(CONFIG_VIRTIO_MMIO) += virtio-mmio.o
 obj-$(CONFIG_VIRTIO_BALLOON) += virtio-balloon.o
 obj-$(CONFIG_VIRTIO_CRYPTO) += virtio-crypto.o
 obj-$(CONFIG_VHOST_USER_FS) += vhost-user-fs.o
+obj-$(CONFIG_VIRTIO_TEST) += virtio-test.o
 obj-$(call land,$(CONFIG_VIRTIO_CRYPTO),$(CONFIG_VIRTIO_PCI)) += virtio-crypto-pci.o
 obj-$(CONFIG_VIRTIO_PMEM) += virtio-pmem.o
 common-obj-$(call land,$(CONFIG_VIRTIO_PMEM),$(CONFIG_VIRTIO_PCI)) += virtio-pmem-pci.o
@@ -33,6 +34,7 @@ obj-$(CONFIG_VIRTIO_SCSI) += virtio-scsi-pci.o
 obj-$(CONFIG_VIRTIO_BLK) += virtio-blk-pci.o
 obj-$(CONFIG_VIRTIO_NET) += virtio-net-pci.o
 obj-$(CONFIG_VIRTIO_SERIAL) += virtio-serial-pci.o
+obj-$(CONFIG_VIRTIO_TEST) += virtio-test-pci.o
 endif
 else
 common-obj-y += vhost-stub.o
