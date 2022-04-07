@@ -64,7 +64,10 @@ static void virtio_test_pci_instance_init(Object *obj)
 
 static const VirtioPCIDeviceTypeInfo virtio_test_pci_info = {
     .base_name             = TYPE_VIRTIO_TEST_PCI,
-    .generic_name          = "virtio-balloon-pci",
+    .generic_name          = "virtio-test-pci",
+    .transitional_name     = "virtio-test-pci-transitional",
+    .non_transitional_name = "virtio-test-pci-non-transitional",
+    .parent        = TYPE_VIRTIO_PCI,
     .instance_size = sizeof(VirtIOTestPCI),
     .instance_init = virtio_test_pci_instance_init,
     .class_init    = virtio_test_pci_class_init,
@@ -72,7 +75,6 @@ static const VirtioPCIDeviceTypeInfo virtio_test_pci_info = {
 
 static void virtio_test_pci_register(void)
 {
-    error_printf("zyq start register virtio_pci\n");
     virtio_pci_types_register(&virtio_test_pci_info);
 }
 

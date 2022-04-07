@@ -814,22 +814,18 @@ ObjectClass *object_class_dynamic_cast(ObjectClass *class,
     TypeImpl *type;
 
     if (!class) {
-        error_printf("class is NULL zyq\n");
         return NULL;
     }
 
     /* A simple fast path that can trigger a lot for leaf classes.  */
     type = class->type;
     if (type->name == typename) {
-        error_printf("type->name(%s) == typename(%s) zyq\n", type->name, typename);
         return class;
     }
-    error_printf("type->name(%s) != typename(%s) zyq\n", type->name, typename);
 
     target_type = type_get_by_name(typename);
     if (!target_type) {
         /* target class type unknown, so fail the cast */
-        error_printf("%s, target class type unknown zyq\n", typename);
         return NULL;
     }
 

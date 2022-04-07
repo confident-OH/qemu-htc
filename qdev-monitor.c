@@ -214,7 +214,6 @@ static DeviceClass *qdev_get_device_class(const char **driver, Error **errp)
 
     oc = object_class_by_name(*driver);
     if (!oc) {
-        error_setg(errp, "'%s' is not find in object_class_by_name zyq", *driver);
         const char *typename = find_typename_by_alias(*driver);
 
         if (typename) {
@@ -228,7 +227,7 @@ static DeviceClass *qdev_get_device_class(const char **driver, Error **errp)
             error_setg(errp, "'%s' (alias '%s') is not a valid device model"
                        " name", original_name, *driver);
         } else {
-            error_setg(errp, "'%s' is not a valid device model name zyq", *driver);
+            error_setg(errp, "'%s' is not a valid device model name", *driver);
         }
         return NULL;
     }
