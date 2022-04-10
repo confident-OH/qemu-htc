@@ -9,17 +9,27 @@
 #define VIRTIO_TEST(obj) \
         OBJECT_CHECK(VirtIOTest, (obj), TYPE_VIRTIO_TEST)
 
+typedef struct HtcZyqData
+{
+    /* data */
+    int64_t id;
+    char htc_str[256];
+}HtcZyqData;
 
 typedef struct VirtIOTest {
     VirtIODevice parent_obj;
     VirtQueue *ivq;
-    uint32_t set_config;
-    uint32_t actual;
     VirtQueueElement *stats_vq_elem;
+    uint32_t set_config; // test
+    uint32_t actual;  // test
     size_t stats_vq_offset;
     QEMUTimer *stats_timer;
     uint32_t host_features;
-    uint32_t event;
+    uint32_t event;   // test
+    HtcZyqData set_data;
 } VirtIOTest;
+
+
+
 
 #endif

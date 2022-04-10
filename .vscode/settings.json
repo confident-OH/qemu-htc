@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "iothread.h": "c"
+        "iothread.h": "c",
+        "qerror.h": "c",
+        "error.h": "c"
     }
 }

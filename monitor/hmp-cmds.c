@@ -1329,6 +1329,16 @@ void hmp_balloon(Monitor *mon, const QDict *qdict)
     hmp_handle_error(mon, &err);
 }
 
+void hmp_htc_zyq(Monitor *mon, const QDict *qdict)
+{
+    int64_t id = qdict_get_int(qdict, "id");
+    const char *htc_str = qdict_get_str(qdict, "htc_str");
+    Error *err = NULL;
+
+    qmp_htc_zyq(id, htc_str, &err);
+    hmp_handle_error(mon, &err);
+}
+
 void hmp_block_resize(Monitor *mon, const QDict *qdict)
 {
     const char *device = qdict_get_str(qdict, "device");

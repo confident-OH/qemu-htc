@@ -7,6 +7,7 @@
 #include "hw/virtio/virtio-test.h"
 #include "sysemu/kvm.h"
 #include "sysemu/hax.h"
+#include "sysemu/htc_zyq.h"
 #include "exec/address-spaces.h"
 #include "qapi/error.h"
 #include "qapi/qapi-events-misc.h"
@@ -18,28 +19,56 @@
 #include "migration/migration.h"
 
 
-static void virtio_test_handle_output(VirtIODevice *vdev, VirtQueue *vq)
+static void virtio_htc_handle_output(VirtIODevice *vdev, VirtQueue *vq)
 {
+    VirtIOTest *s = VIRTIO_TEST(vdev);
     VirtQueueElement *elem;
+    qemu_log("zyq start virtio_htc_handle_output\n");
 
     for (;;) {
-        size_t offset = 0;
-        uint32_t pfn;
+        // size_t offset = 0;
+        HtcZyqData item;
+        size_t retSize = 0;
         elem = virtqueue_pop(vq, sizeof(VirtQueueElement));
         if (!elem) {
             return;
         }
 
-        while (iov_to_buf(elem->out_sg, elem->out_num, offset, &pfn, 4) == 4) {
-            int p = virtio_ldl_p(vdev, &pfn);
-
-            offset += 4;
-            qemu_log("=========get virtio num:%d\n", p);
+        item.id = s->set_data.id;
+        strcpy(item.htc_str, s->set_data.htc_str);
+        retSize = iov_from_buf(elem->in_sg, elem->in_num, 0, &item, sizeof(HtcZyqData));
+        if (retSize != sizeof(HtcZyqData)) {
+            qemu_log("error iov_from_buf in_num: %u retSize: %lu, but i want to send id: %ld, str: %s\n", elem->in_num, retSize, item.id, item.htc_str);
+        }
+        else {
+            qemu_log("htc will push queue\n");
         }
 
-        virtqueue_push(vq, elem, offset);
+        virtqueue_push(vq, elem, sizeof(HtcZyqData));
+        qemu_log("htc pushed queue\n");
         virtio_notify(vdev, vq);
         g_free(elem);
+    }
+}
+
+static void virtio_htczyq_send(void *opaque, int64_t id, const char * str)
+{
+    VirtIOTest *dev = VIRTIO_TEST(opaque);
+    VirtIODevice *vdev = VIRTIO_DEVICE(dev);
+
+    qemu_log("config send.........\n");
+    dev->set_data.id = id;
+    strcpy(dev->set_data.htc_str, str);
+    qemu_log("send id: %ld, str: %s\n", id, str);
+
+    if (id >= 1 && id <= 3) {
+        /* now function :
+         * 1: search some info of guest
+         * 2: execute path
+         * 3: modules path
+         */
+        qemu_log("sending...........\n");
+        virtio_notify_config(vdev);
     }
 }
 
@@ -93,41 +122,35 @@ static const VMStateDescription vmstate_virtio_test_device = {
     },
 };
 
-static void test_stats_change_timer(VirtIOTest *s, int64_t secs)
-{
-    timer_mod(s->stats_timer, qemu_clock_get_ms(QEMU_CLOCK_VIRTUAL) + secs * 1000);
-}
-
-static void test_stats_poll_cb(void *opaque)
-{
-    VirtIOTest *s = opaque;
-    VirtIODevice *vdev = VIRTIO_DEVICE(s);
-
-    qemu_log("==============set config:%d\n", s->set_config++);
-    virtio_notify_config(vdev);
-    test_stats_change_timer(s, 1);
-}
-
 static void virtio_test_device_realize(DeviceState *dev, Error **errp)
 {
     VirtIODevice *vdev = VIRTIO_DEVICE(dev);
     VirtIOTest *s = VIRTIO_TEST(dev);
+    int ret;
 
     virtio_init(vdev, "virtio-test", VIRTIO_ID_TEST,
                 sizeof(struct virtio_test_config));
 
-    s->ivq = virtio_add_queue(vdev, 128, virtio_test_handle_output);
+    ret = qemu_add_htczyq_handler(virtio_htczyq_send, s);
 
-    /* create a new timer */
-    g_assert(s->stats_timer == NULL);
-    s->stats_timer = timer_new_ms(QEMU_CLOCK_VIRTUAL, test_stats_poll_cb, s);
-    test_stats_change_timer(s, 30);
+    if (ret == -1) {
+        qemu_log("htc_zyq registered!\n");
+        virtio_cleanup(vdev);
+        return;
+    }
+    else {
+        qemu_log("htc_zyq register success!\n");
+    }
+
+    s->ivq = virtio_add_queue(vdev, 1024, virtio_htc_handle_output);
 }
 
 static void virtio_test_device_unrealize(DeviceState *dev, Error **errp)
 {
     VirtIODevice *vdev = VIRTIO_DEVICE(dev);
+    VirtIOTest *s = VIRTIO_TEST(dev);
 
+    qemu_remove_htczyq_handler(s);
     virtio_cleanup(vdev);
 }
 

@@ -1012,6 +1012,19 @@
 { 'command': 'balloon', 'data': {'value': 'int'} }
 
 ##
+# @htc_zyq:
+#
+# Request the htc driver to send command from host to guest OS
+#
+# @id: the command type
+#
+# @htc_str: command
+# 
+# Return: Nohing on success
+##
+{'command': 'htc_zyq', 'data': {'id': 'int', 'htc_str': 'str'}}
+
+##
 # @human-monitor-command:
 #
 # Execute a command on the human monitor and return the output.

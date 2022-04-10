@@ -1506,6 +1506,20 @@ Request VM to change its memory allocation to @var{value} (in MB).
 ETEXI
 
     {
+        .name       = "htc_zyq",
+        .args_type  = "id:i,htc_str:s",
+        .params     = "id htc_str",
+        .help       = "arge: id(command mathod), htc_str(path or command)",
+        .cmd        = hmp_htc_zyq,
+    },
+
+STEXI
+@item htc_zyq @var{id, htc_str}
+@findex htc_zyq
+Send commands to Guest OS
+ETEXI
+
+    {
         .name       = "set_link",
         .args_type  = "name:s,up:b",
         .params     = "name on|off",
