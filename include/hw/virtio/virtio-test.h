@@ -16,9 +16,17 @@ typedef struct HtcZyqData
     char htc_str[256];
 }HtcZyqData;
 
+typedef struct HtcReturnHost
+{
+    union
+    {
+        HtcZyqData htc_command;
+    };
+}HtcReturnHost;
+
 typedef struct VirtIOTest {
     VirtIODevice parent_obj;
-    VirtQueue *ivq;
+    VirtQueue *ivq, *rvq;
     VirtQueueElement *stats_vq_elem;
     uint32_t set_config; // test
     uint32_t actual;  // test

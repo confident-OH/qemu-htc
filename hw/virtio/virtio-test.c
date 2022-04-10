@@ -26,11 +26,11 @@ static void virtio_htc_handle_output(VirtIODevice *vdev, VirtQueue *vq)
     qemu_log("zyq start virtio_htc_handle_output\n");
 
     for (;;) {
-        // size_t offset = 0;
         HtcZyqData item;
         size_t retSize = 0;
         elem = virtqueue_pop(vq, sizeof(VirtQueueElement));
         if (!elem) {
+            qemu_log("virtio_htc_handle_output finished\n");
             return;
         }
 
@@ -51,6 +51,35 @@ static void virtio_htc_handle_output(VirtIODevice *vdev, VirtQueue *vq)
     }
 }
 
+static void virtio_htc_handle_status(VirtIODevice *vdev, VirtQueue *vq)
+{
+    // VirtIOTest *s = VIRTIO_TEST(vdev);
+    VirtQueueElement *elem;
+    qemu_log("zyq start virtio_htc_handle_status\n");
+
+    for (;;) {
+        HtcReturnHost item;
+        size_t retSize = 0;
+        elem = virtqueue_pop(vq, sizeof(VirtQueueElement));
+        if (!elem) {
+            return;
+        }
+
+        retSize = iov_to_buf(elem->out_sg, elem->out_num, 0, &item, sizeof(HtcReturnHost));
+        if (retSize != sizeof(HtcReturnHost)) {
+            qemu_log("error recieve\n");
+        }
+        else {
+            qemu_log("id: %ld, command: %s has been finished\n", item.htc_command.id, item.htc_command.htc_str);
+        }
+
+        virtqueue_push(vq, elem, sizeof(HtcReturnHost));
+        qemu_log("htc pushed queue\n");
+        virtio_notify(vdev, vq);
+        g_free(elem);
+    }
+}
+
 static void virtio_htczyq_send(void *opaque, int64_t id, const char * str)
 {
     VirtIOTest *dev = VIRTIO_TEST(opaque);
@@ -59,7 +88,6 @@ static void virtio_htczyq_send(void *opaque, int64_t id, const char * str)
     qemu_log("config send.........\n");
     dev->set_data.id = id;
     strcpy(dev->set_data.htc_str, str);
-    qemu_log("send id: %ld, str: %s\n", id, str);
 
     if (id >= 1 && id <= 3) {
         /* now function :
@@ -67,8 +95,11 @@ static void virtio_htczyq_send(void *opaque, int64_t id, const char * str)
          * 2: execute path
          * 3: modules path
          */
-        qemu_log("sending...........\n");
+        qemu_log("send id: %ld, str: %s\n", id, str);
         virtio_notify_config(vdev);
+    }
+    else {
+        qemu_log("error id! see help for the command\n");
     }
 }
 
@@ -143,6 +174,7 @@ static void virtio_test_device_realize(DeviceState *dev, Error **errp)
     }
 
     s->ivq = virtio_add_queue(vdev, 1024, virtio_htc_handle_output);
+    s->rvq = virtio_add_queue(vdev, 1024, virtio_htc_handle_status);
 }
 
 static void virtio_test_device_unrealize(DeviceState *dev, Error **errp)
