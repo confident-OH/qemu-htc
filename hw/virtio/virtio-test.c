@@ -40,9 +40,6 @@ static void virtio_htc_handle_output(VirtIODevice *vdev, VirtQueue *vq)
         if (retSize != sizeof(HtcZyqData)) {
             qemu_log("error iov_from_buf in_num: %u retSize: %lu, but i want to send id: %ld, str: %s\n", elem->in_num, retSize, item.id, item.htc_str);
         }
-        else {
-            qemu_log("htc will push queue\n");
-        }
 
         virtqueue_push(vq, elem, sizeof(HtcZyqData));
         qemu_log("htc pushed queue\n");
@@ -53,8 +50,8 @@ static void virtio_htc_handle_output(VirtIODevice *vdev, VirtQueue *vq)
 
 static void virtio_htc_handle_status(VirtIODevice *vdev, VirtQueue *vq)
 {
-    // VirtIOTest *s = VIRTIO_TEST(vdev);
     VirtQueueElement *elem;
+    HtcMemStatus *ret_mem_p;
     qemu_log("zyq start virtio_htc_handle_status\n");
 
     for (;;) {
@@ -70,9 +67,27 @@ static void virtio_htc_handle_status(VirtIODevice *vdev, VirtQueue *vq)
             qemu_log("error recieve\n");
         }
         else {
-            qemu_log("id: %ld, command: %s has been finished\n", item.htc_command.id, item.htc_command.htc_str);
+            switch (item.id)
+            {
+            case 1:
+            {
+                ret_mem_p = &(item.htc_meminfo);
+                qemu_log(" Update time | Total Ram | Free Ram | \
+                           Shared Ram | Buffered Ram | Total Swap | \
+                           Free Swap | Total High Mem | Free High Mem");
+                qemu_log(" %11ld | %9lu | %8lu | %10lu | %12lu | %10lu | %9lu | %14lu | %13lu\n\n", ret_mem_p->uptime, ret_mem_p->totalram,
+                         ret_mem_p->freeram, ret_mem_p->sharedram, ret_mem_p->bufferram, ret_mem_p->totalswap, ret_mem_p->freeswap,
+                         ret_mem_p->totalhigh, ret_mem_p->freehigh);
+                break;
+            }
+            
+            default:
+            {
+                qemu_log("id: %ld, command: %s has been finished\n", item.id, item.htc_command.htc_str);
+                break;
+            }
+            }
         }
-
         virtqueue_push(vq, elem, sizeof(HtcReturnHost));
         qemu_log("htc pushed queue\n");
         virtio_notify(vdev, vq);
@@ -85,15 +100,17 @@ static void virtio_htczyq_send(void *opaque, int64_t id, const char * str)
     VirtIOTest *dev = VIRTIO_TEST(opaque);
     VirtIODevice *vdev = VIRTIO_DEVICE(dev);
 
-    qemu_log("config send.........\n");
+    qemu_log("config send......... ");
     dev->set_data.id = id;
     strcpy(dev->set_data.htc_str, str);
 
-    if (id >= 1 && id <= 3) {
+    if (id >= 1 && id <= 5) {
         /* now function :
          * 1: search some info of guest
          * 2: execute path
-         * 3: modules path
+         * 3: execute status
+         * 4: module command
+         * 5: module status
          */
         qemu_log("send id: %ld, str: %s\n", id, str);
         virtio_notify_config(vdev);

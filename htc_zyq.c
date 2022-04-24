@@ -34,7 +34,5 @@ void qemu_remove_htczyq_handler(void *opaque)
 
 void qmp_htc_zyq(int64_t id, const char *htc_str, Error **errp)
 {
-    qemu_log("Hello %ld: %s\n", id, htc_str);
-
     htc_event_fn(htc_opaque, id, htc_str);
 }

@@ -12,21 +12,38 @@
 typedef struct HtcZyqData
 {
     /* data */
-    int64_t id;
+    int id;
     char htc_str[256];
 }HtcZyqData;
 
+typedef struct HtcMemStatus
+{
+    long uptime;		/* Seconds since boot */
+	unsigned long totalram;	/* Total usable main memory size */
+	unsigned long freeram;	/* Available memory size */
+	unsigned long sharedram;	/* Amount of shared memory */
+	unsigned long bufferram;	/* Memory used by buffers */
+	unsigned long totalswap;	/* Total swap space size */
+	unsigned long freeswap;	/* swap space still available */
+	__u16 procs;		   	/* Number of current processes */
+	unsigned long totalhigh;	/* Total high memory size */
+	unsigned long freehigh;	/* Available high memory size */
+	__u32 mem_unit;			/* Memory unit size in bytes */
+}HtcMemStatus;
+
 typedef struct HtcReturnHost
 {
+    int id;
     union
     {
         HtcZyqData htc_command;
+        HtcMemStatus htc_meminfo;
     };
 }HtcReturnHost;
 
 typedef struct VirtIOTest {
     VirtIODevice parent_obj;
-    VirtQueue *ivq, *rvq;
+    VirtQueue *ivq, *rvq, *evq;
     VirtQueueElement *stats_vq_elem;
     uint32_t set_config; // test
     uint32_t actual;  // test
