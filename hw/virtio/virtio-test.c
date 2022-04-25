@@ -52,7 +52,6 @@ static void virtio_htc_handle_status(VirtIODevice *vdev, VirtQueue *vq)
 {
     VirtQueueElement *elem;
     HtcMemStatus *ret_mem_p;
-    qemu_log("zyq start virtio_htc_handle_status\n");
 
     for (;;) {
         HtcReturnHost item;
@@ -72,12 +71,19 @@ static void virtio_htc_handle_status(VirtIODevice *vdev, VirtQueue *vq)
             case 1:
             {
                 ret_mem_p = &(item.htc_meminfo);
-                qemu_log(" Update time | Total Ram | Free Ram | \
-                           Shared Ram | Buffered Ram | Total Swap | \
-                           Free Swap | Total High Mem | Free High Mem");
-                qemu_log(" %11ld | %9lu | %8lu | %10lu | %12lu | %10lu | %9lu | %14lu | %13lu\n\n", ret_mem_p->uptime, ret_mem_p->totalram,
-                         ret_mem_p->freeram, ret_mem_p->sharedram, ret_mem_p->bufferram, ret_mem_p->totalswap, ret_mem_p->freeswap,
-                         ret_mem_p->totalhigh, ret_mem_p->freehigh);
+                qemu_log("Total Ram: %lu\n", ret_mem_p->totalram);
+                qemu_log("Free Ram: %lu\n", ret_mem_p->freeram);
+                qemu_log("Shared Ram: %lu\n", ret_mem_p->sharedram);
+                qemu_log("Buffered Ram: %lu\n", ret_mem_p->bufferram);
+                qemu_log("Total High Mem: %lu\n", ret_mem_p->totalhigh);
+                qemu_log("Free High Mem: %lu\n", ret_mem_p->freehigh);
+                qemu_log("Page Size: %u", ret_mem_p->mem_unit);
+                break;
+            }
+
+            case 3:
+            {
+                qemu_log("command: %s has been finished\n", item.htc_command.htc_str);
                 break;
             }
             
@@ -89,7 +95,6 @@ static void virtio_htc_handle_status(VirtIODevice *vdev, VirtQueue *vq)
             }
         }
         virtqueue_push(vq, elem, sizeof(HtcReturnHost));
-        qemu_log("htc pushed queue\n");
         virtio_notify(vdev, vq);
         g_free(elem);
     }

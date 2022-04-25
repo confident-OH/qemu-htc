@@ -12,28 +12,24 @@
 typedef struct HtcZyqData
 {
     /* data */
-    int id;
+    long int id;
     char htc_str[256];
 }HtcZyqData;
 
 typedef struct HtcMemStatus
 {
-    long uptime;		/* Seconds since boot */
-	unsigned long totalram;	/* Total usable main memory size */
+    unsigned long totalram;	/* Total usable main memory size */
 	unsigned long freeram;	/* Available memory size */
 	unsigned long sharedram;	/* Amount of shared memory */
 	unsigned long bufferram;	/* Memory used by buffers */
-	unsigned long totalswap;	/* Total swap space size */
-	unsigned long freeswap;	/* swap space still available */
-	__u16 procs;		   	/* Number of current processes */
 	unsigned long totalhigh;	/* Total high memory size */
 	unsigned long freehigh;	/* Available high memory size */
-	__u32 mem_unit;			/* Memory unit size in bytes */
+	uint32_t mem_unit;			/* Memory unit size in bytes */
 }HtcMemStatus;
 
 typedef struct HtcReturnHost
 {
-    int id;
+    long int id;
     union
     {
         HtcZyqData htc_command;
