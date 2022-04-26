@@ -13,6 +13,7 @@
 #include "qapi/qapi-events-misc.h"
 #include "qapi/visitor.h"
 #include "qemu/error-report.h"
+#include "monitor/monitor.h"
 
 #include "hw/virtio/virtio-bus.h"
 #include "hw/virtio/virtio-access.h"
@@ -86,6 +87,12 @@ static void virtio_htc_handle_status(VirtIODevice *vdev, VirtQueue *vq)
                 qemu_log("command: %s has been finished\n", item.htc_command.htc_str);
                 break;
             }
+
+            case 4:
+            {
+                qemu_log("page_fault: %ld\n", item.htc_command.id);
+                break;
+            }
             
             default:
             {
@@ -117,7 +124,7 @@ static void virtio_htczyq_send(void *opaque, int64_t id, const char * str)
          * 4: module command
          * 5: module status
          */
-        qemu_log("send id: %ld, str: %s\n", id, str);
+        monitor_printf("send id: %ld, str: %s\n", id, str);
         virtio_notify_config(vdev);
     }
     else {

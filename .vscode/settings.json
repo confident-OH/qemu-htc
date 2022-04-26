@@ -4,6 +4,7 @@
         "qerror.h": "c",
         "error.h": "c",
         "unistd.h": "c",
-        "*.list": "c"
+        "*.list": "c",
+        "hmp.h": "c"
     }
 }
