@@ -32,7 +32,12 @@ void qemu_remove_htczyq_handler(void *opaque)
     htc_opaque = NULL;
 }
 
-void qmp_htc_zyq(int64_t id, const char *htc_str, Error **errp)
+HtcQmpInfo * qmp_htc_zyq(int64_t id, const char *htc_str, Error **errp)
 {
-    htc_event_fn(htc_opaque, id, htc_str);
+    HtcQmpInfo *info = NULL;
+    info = g_malloc0(sizeof(*info));
+    info->page_fault = htc_event_fn(htc_opaque, id, htc_str);
+    info->id = 0;
+    info->command = NULL;
+    return info;
 }

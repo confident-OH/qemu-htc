@@ -4,7 +4,7 @@
 #include "exec/cpu-common.h"
 #include "qapi/qapi-types-misc.h"
 
-typedef void (QEMUHtczyqEvent) (void *opaque, int64_t id, const char * str);
+typedef int64_t (QEMUHtczyqEvent) (void *opaque, int64_t id, const char * str);
 
 int qemu_add_htczyq_handler(QEMUHtczyqEvent *event_func, void *opaque);
 void qemu_remove_htczyq_handler(void *opaque);

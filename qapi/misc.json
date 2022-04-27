@@ -429,7 +429,7 @@
 #
 # Example:
 #
-# -> { "execute": "query-balloon" }
+# -> { "execute": "" }
 # <- { "return": {
 #          "actual": 1073741824,
 #       }
@@ -1011,6 +1011,23 @@
 ##
 { 'command': 'balloon', 'data': {'value': 'int'} }
 
+
+##
+# @HtcQmpInfo:
+#
+# Actual memory information in bytes.
+#
+# @id: size of "base" memory specified with command line
+#               option -m.
+#
+# @command: dfa
+#
+# @page_fault: da
+# 
+# Since: 2.11.0
+##
+{ 'struct': 'HtcQmpInfo', 'data': {'id': 'int', 'command': ['str'], 'page_fault': 'int'} }
+
 ##
 # @htc_zyq:
 #
@@ -1020,9 +1037,9 @@
 #
 # @htc_str: command
 # 
-# Return: Nohing on success
+# Return: id, num
 ##
-{'command': 'htc_zyq', 'data': {'id': 'int', 'htc_str': 'str'}}
+{'command': 'htc_zyq', 'data': {'id': 'int', 'htc_str': 'str'}, 'returns': 'HtcQmpInfo' }
 
 ##
 # @human-monitor-command:
