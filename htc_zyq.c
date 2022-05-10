@@ -38,6 +38,5 @@ HtcQmpInfo * qmp_htc_zyq(int64_t id, const char *htc_str, Error **errp)
     info = g_malloc0(sizeof(*info));
     info->page_fault = htc_event_fn(htc_opaque, id, htc_str);
     info->id = 0;
-    info->command = NULL;
     return info;
 }

@@ -21,32 +21,35 @@
 #include "hw/virtio/virtio-access.h"
 #include "migration/migration.h"
 
+/*
 union HTCSendSem {
-    int              val;    /* Value for SETVAL */
-    struct semid_ds *buf;    /* Buffer for IPC_STAT, IPC_SET */
-    unsigned short  *array;  /* Array for GETALL, SETALL */
-    struct seminfo  *__buf;  /* Buffer for IPC_INFO */
+    int              val;    
+    struct semid_ds *buf;    
+    unsigned short  *array;  
+    struct seminfo  *__buf;  
 };
+*/
 
-int HTC_sem_id;
+// int HTC_sem_id;
 
 int64_t HTC_return_qmp;
 
+/*
 static int create_Sem(int key, int size)
 {
 	int id;
-	id = semget(key, size, IPC_CREAT|0666);  //创建size个信号量
-	if(id < 0) {                             //判断是否创建成功
-		printf("create sem %d,%d error\n", key, size);//创建失败，打印错误
+	id = semget(key, size, IPC_CREAT|0666);
+	if(id < 0) {                          
+		qemu_log("create sem %d,%d error\n", key, size);
 	}
 	return id;
 }
 
 static void destroy_Sem(int semid)
 {
-	int res = semctl(semid,0,IPC_RMID,0);//从系统中删除信号量
-	if (res < 0) {//判断是否删除成功
-		printf("destroy sem %d error\n", semid);//信号量删除失败，输出信息
+	int res = semctl(semid,0,IPC_RMID,0);
+	if (res < 0) {
+		qemu_log("destroy sem %d error\n", semid);
 	}
 	return;
 }
@@ -78,6 +81,7 @@ static void HTCSendV(int semid, int index)
     semop(semid,&sem,1);//1:表示执行命令的个数
 	return;
 }
+*/
 
 static void virtio_htc_handle_output(VirtIODevice *vdev, VirtQueue *vq)
 {
@@ -118,7 +122,6 @@ static void virtio_htc_handle_status(VirtIODevice *vdev, VirtQueue *vq)
         size_t retSize = 0;
         elem = virtqueue_pop(vq, sizeof(VirtQueueElement));
         if (!elem) {
-            HTCSendV(HTC_sem_id, 0);
             return;
         }
 
@@ -168,6 +171,19 @@ static void virtio_htc_handle_status(VirtIODevice *vdev, VirtQueue *vq)
     }
 }
 
+/*
+static void* pri_virtio(void* arg)
+{
+    virtio_notify_config((VirtIODevice *)arg);
+    return arg;
+}
+
+static void* pri1(void* arg)
+{
+    return arg;
+}
+*/
+
 static int64_t virtio_htczyq_send(void *opaque, int64_t id, const char * str)
 {
     VirtIOTest *dev = VIRTIO_TEST(opaque);
@@ -187,7 +203,6 @@ static int64_t virtio_htczyq_send(void *opaque, int64_t id, const char * str)
          */
         qemu_log("send id: %ld, str: %s\n", id, str);
         virtio_notify_config(vdev);
-        HTCSendP(HTC_sem_id, 0);
         return HTC_return_qmp;
     }
     else {
@@ -266,8 +281,8 @@ static void virtio_test_device_realize(DeviceState *dev, Error **errp)
         qemu_log("htc_zyq register success!\n");
     }
 
-    HTC_sem_id = create_Sem(0, 1);
-    set_N(HTC_sem_id, 0, 0);
+    // HTC_sem_id = create_Sem(0, 1);
+    // set_N(HTC_sem_id, 0, 0);
 
     s->ivq = virtio_add_queue(vdev, 1024, virtio_htc_handle_output);
     s->rvq = virtio_add_queue(vdev, 1024, virtio_htc_handle_status);
@@ -277,7 +292,7 @@ static void virtio_test_device_unrealize(DeviceState *dev, Error **errp)
 {
     VirtIODevice *vdev = VIRTIO_DEVICE(dev);
     VirtIOTest *s = VIRTIO_TEST(dev);
-    destroy_Sem(HTC_sem_id);
+    // destroy_Sem(HTC_sem_id);
 
     qemu_remove_htczyq_handler(s);
     virtio_cleanup(vdev);

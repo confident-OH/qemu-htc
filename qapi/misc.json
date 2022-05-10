@@ -1020,13 +1020,11 @@
 # @id: size of "base" memory specified with command line
 #               option -m.
 #
-# @command: dfa
-#
 # @page_fault: da
 # 
 # Since: 2.11.0
 ##
-{ 'struct': 'HtcQmpInfo', 'data': {'id': 'int', 'command': ['str'], 'page_fault': 'int'} }
+{ 'struct': 'HtcQmpInfo', 'data': {'id': 'int', 'page_fault': 'int'} }
 
 ##
 # @htc_zyq:
