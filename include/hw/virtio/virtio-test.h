@@ -13,7 +13,7 @@ typedef struct HtcZyqData
 {
     /* data */
     long int id;
-    char htc_str[256];
+    char htc_str[1024];
 }HtcZyqData;
 
 typedef struct HtcMemStatus

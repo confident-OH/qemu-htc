@@ -87,14 +87,14 @@ static void virtio_htc_handle_output(VirtIODevice *vdev, VirtQueue *vq)
 {
     VirtIOTest *s = VIRTIO_TEST(vdev);
     VirtQueueElement *elem;
-    qemu_log("zyq start virtio_htc_handle_output\n");
+    //qemu_log("zyq start virtio_htc_handle_output\n");
 
     for (;;) {
         HtcZyqData item;
         size_t retSize = 0;
         elem = virtqueue_pop(vq, sizeof(VirtQueueElement));
         if (!elem) {
-            qemu_log("virtio_htc_handle_output finished\n");
+            //qemu_log("virtio_htc_handle_output finished\n");
             return;
         }
 
@@ -106,7 +106,7 @@ static void virtio_htc_handle_output(VirtIODevice *vdev, VirtQueue *vq)
         }
 
         virtqueue_push(vq, elem, sizeof(HtcZyqData));
-        qemu_log("htc pushed queue\n");
+        //qemu_log("htc pushed queue\n");
         virtio_notify(vdev, vq);
         g_free(elem);
     }
@@ -135,13 +135,13 @@ static void virtio_htc_handle_status(VirtIODevice *vdev, VirtQueue *vq)
             case 1:
             {
                 ret_mem_p = &(item.htc_meminfo);
-                qemu_log("Total Ram: %lu\n", ret_mem_p->totalram);
-                qemu_log("Free Ram: %lu\n", ret_mem_p->freeram);
-                qemu_log("Shared Ram: %lu\n", ret_mem_p->sharedram);
-                qemu_log("Buffered Ram: %lu\n", ret_mem_p->bufferram);
-                qemu_log("Total High Mem: %lu\n", ret_mem_p->totalhigh);
-                qemu_log("Free High Mem: %lu\n", ret_mem_p->freehigh);
-                qemu_log("Page Size: %u", ret_mem_p->mem_unit);
+                qemu_log("Total Ram: %lf\n", (double)(ret_mem_p->totalram)/1024/1024);
+                qemu_log("Free Ram: %lf\n", (double)(ret_mem_p->freeram)/1024/1024);
+                qemu_log("Shared Ram: %lf\n", (double)(ret_mem_p->sharedram)/1024/1024);
+                qemu_log("Buffered Ram: %lf\n", (double)(ret_mem_p->bufferram)/1024/1024);
+                //qemu_log("Total High Mem: %lu\n", ret_mem_p->totalhigh);
+                //qemu_log("Free High Mem: %lu\n", ret_mem_p->freehigh);
+                qemu_log("Page Size: %u\n", ret_mem_p->mem_unit);
                 break;
             }
 
@@ -157,10 +157,16 @@ static void virtio_htc_handle_status(VirtIODevice *vdev, VirtQueue *vq)
                 HTC_return_qmp = item.htc_command.id;
                 break;
             }
+
+            case 6:
+            {
+                qemu_log("%s\n", item.htc_command.htc_str);
+                break;
+            }
             
             default:
             {
-                qemu_log("id: %ld, command: %s has been finished\n", item.id, item.htc_command.htc_str);
+                //qemu_log("id: %ld, command: %s has been finished\n", item.id, item.htc_command.htc_str);
                 break;
             }
             }
@@ -189,19 +195,20 @@ static int64_t virtio_htczyq_send(void *opaque, int64_t id, const char * str)
     VirtIOTest *dev = VIRTIO_TEST(opaque);
     VirtIODevice *vdev = VIRTIO_DEVICE(dev);
 
-    qemu_log("config send......... ");
+    //qemu_log("config send......... ");
     dev->set_data.id = id;
     strcpy(dev->set_data.htc_str, str);
 
-    if (id >= 1 && id <= 5) {
+    if (id >= 1 && id <= 10) {
         /* now function :
          * 1: search some info of guest
          * 2: execute path
          * 3: execute status
          * 4: module command
          * 5: module status
+         * 6: execute info
          */
-        qemu_log("send id: %ld, str: %s\n", id, str);
+        //qemu_log("send id: %ld, str: %s\n", id, str);
         virtio_notify_config(vdev);
         return HTC_return_qmp;
     }
@@ -278,7 +285,7 @@ static void virtio_test_device_realize(DeviceState *dev, Error **errp)
         return;
     }
     else {
-        qemu_log("htc_zyq register success!\n");
+        // qemu_log("htc_zyq register success!\n");
     }
 
     // HTC_sem_id = create_Sem(0, 1);
